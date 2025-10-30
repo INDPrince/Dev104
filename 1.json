@@ -1,0 +1,544 @@
+{
+  "questions": [
+    {
+      "question": "What is the science that deals with composition, structure, and properties of matter?",
+      "answer": "Chemistry",
+      "options": ["Chemistry", "Physics", "Biology", "Geology"],
+      "remarks": ["Correct! Chemistry is the study of matter."]
+    },
+    {
+      "question": "Which branch of chemistry deals with carbon compounds?",
+      "answer": "Organic Chemistry",
+      "options": ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry", "Analytical Chemistry"],
+      "remarks": ["Correct! Organic chemistry studies carbon-based compounds."]
+    },
+    {
+      "question": "Who proposed the Law of Conservation of Mass?",
+      "answer": "Antoine Lavoisier",
+      "options": ["Antoine Lavoisier", "John Dalton", "Joseph Proust", "Amedeo Avogadro"],
+      "remarks": ["Correct! Lavoisier established law of conservation of mass in 1789."]
+    },
+    {
+      "question": "According to law of conservation of mass, in a chemical reaction:",
+      "answer": "Mass remains constant",
+      "options": ["Mass remains constant", "Mass increases", "Mass decreases", "Mass converts to energy"],
+      "remarks": ["Correct! Total mass of reactants equals total mass of products."]
+    },
+    {
+      "question": "If 12g carbon reacts with 32g oxygen to form CO₂, what is mass of CO₂ formed?",
+      "answer": "44g",
+      "options": ["44g", "20g", "32g", "64g"],
+      "remarks": ["Correct! 12g + 32g = 44g (mass conserved)."]
+    },
+    {
+      "question": "Law of Definite Proportions was given by:",
+      "answer": "Joseph Proust",
+      "options": ["Joseph Proust", "Lavoisier", "Dalton", "Gay-Lussac"],
+      "remarks": ["Correct! Proust proposed law of definite proportions in 1799."]
+    },
+    {
+      "question": "In water, hydrogen and oxygen are always present in mass ratio:",
+      "answer": "1:8",
+      "options": ["1:8", "2:1", "8:1", "1:16"],
+      "remarks": ["Correct! In H₂O, H:O mass ratio is 2:16 = 1:8"]
+    },
+    {
+      "question": "Law of definite proportions is also known as:",
+      "answer": "Law of constant composition",
+      "options": ["Law of constant composition", "Law of multiple proportions", "Law of reciprocal proportions", "Avogadro's law"],
+      "remarks": ["Correct! Also called law of constant composition."]
+    },
+    {
+      "question": "Law of Multiple Proportions was proposed by:",
+      "answer": "John Dalton",
+      "options": ["John Dalton", "Lavoisier", "Proust", "Avogadro"],
+      "remarks": ["Correct! Dalton proposed law of multiple proportions in 1804."]
+    },
+    {
+      "question": "CO and CO₂ are examples of which law?",
+      "answer": "Law of Multiple Proportions",
+      "options": ["Law of Multiple Proportions", "Law of Conservation of Mass", "Law of Definite Proportions", "Avogadro's Law"],
+      "remarks": ["Correct! Same elements (C,O) combine in different ratios."]
+    },
+    {
+      "question": "In CO and CO₂, when same mass of carbon combines with oxygen, oxygen ratio is:",
+      "answer": "1:2",
+      "options": ["1:2", "1:1", "2:1", "1:3"],
+      "remarks": ["Correct! 16g:32g = 1:2 (simple whole number ratio)."]
+    },
+    {
+      "question": "Gay-Lussac's Law states that gases react in:",
+      "answer": "Simple whole number volume ratios",
+      "options": ["Simple whole number volume ratios", "Equal volumes always", "Mass ratios", "Mole ratios only"],
+      "remarks": ["Correct! Gases combine in simple volume ratios at same T & P."]
+    },
+    {
+      "question": "N₂ + 3H₂ → 2NH₃. Volume ratio of N₂ to H₂ is:",
+      "answer": "1:3",
+      "options": ["1:3", "1:1", "1:2", "2:3"],
+      "remarks": ["Correct! 1 volume N₂ reacts with 3 volumes H₂"]
+    },
+    {
+      "question": "Avogadro's Law states that equal volumes of gases at same T and P contain:",
+      "answer": "Equal number of molecules",
+      "options": ["Equal number of molecules", "Equal masses", "Equal densities", "Equal molar masses"],
+      "remarks": ["Correct! Equal volumes have equal molecules at same T & P."]
+    },
+    {
+      "question": "Who proposed that equal volumes of gases contain equal number of molecules?",
+      "answer": "Amedeo Avogadro",
+      "options": ["Amedeo Avogadro", "Gay-Lussac", "Dalton", "Berzelius"],
+      "remarks": ["Correct! Avogadro proposed this hypothesis in 1811."]
+    },
+    {
+      "question": "An atom is:",
+      "answer": "Smallest particle of element that can take part in chemical reaction",
+      "options": ["Smallest particle of element that can take part in chemical reaction", "Smallest particle of matter", "Smallest particle that exists independently", "Basic unit of compound"],
+      "remarks": ["Correct! Atom is smallest unit of element in reactions."]
+    },
+    {
+      "question": "A molecule is:",
+      "answer": "Smallest particle that can exist independently",
+      "options": ["Smallest particle that can exist independently", "Smallest particle of element only", "Made of same atoms only", "Always a compound"],
+      "remarks": ["Correct! Molecule is smallest independent particle."]
+    },
+    {
+      "question": "One atomic mass unit (u) equals:",
+      "answer": "1/12th mass of one C-12 atom",
+      "options": ["1/12th mass of one C-12 atom", "Mass of one H atom", "Mass of one proton", "1.66 × 10⁻²⁴ g"],
+      "remarks": ["Correct! 1 u = 1/12 mass of C-12"]
+    },
+    {
+      "question": "Atomic mass of carbon-12 is exactly:",
+      "answer": "12 u",
+      "options": ["12 u", "6 u", "12.01 u", "24 u"],
+      "remarks": ["Correct! C-12 is defined as exactly 12 u."]
+    },
+    {
+      "question": "Molecular mass is calculated by:",
+      "answer": "Sum of atomic masses of all atoms",
+      "options": ["Sum of atomic masses of all atoms", "Average of atomic masses", "Product of atomic masses", "Difference of atomic masses"],
+      "remarks": ["Correct! Molecular mass = Σ(atomic masses)."]
+    },
+    {
+      "question": "Molecular mass of H₂SO₄ is: (H=1, S=32, O=16)",
+      "answer": "98 u",
+      "options": ["98 u", "49 u", "82 u", "108 u"],
+      "remarks": ["Correct! 2(1) + 32 + 4(16) = 98 u"]
+    },
+    {
+      "question": "Formula mass is used for:",
+      "answer": "Ionic compounds",
+      "options": ["Ionic compounds", "Covalent compounds", "Gases only", "Organic compounds"],
+      "remarks": ["Correct! Formula mass for ionic compounds (no molecules)."]
+    },
+    {
+      "question": "Formula mass of NaCl is: (Na=23, Cl=35.5)",
+      "answer": "58.5 u",
+      "options": ["58.5 u", "35.5 u", "81.5 u", "23 u"],
+      "remarks": ["Correct! 23 + 35.5 = 58.5 u"]
+    },
+    {
+      "question": "One mole is defined as:",
+      "answer": "Amount of substance containing as many entities as atoms in 12g C-12",
+      "options": ["Amount of substance containing as many entities as atoms in 12g C-12", "6.022 × 10²³ atoms only", "1 gram of any substance", "22.4 L of gas"],
+      "remarks": ["Correct! SI definition of mole."]
+    },
+    {
+      "question": "Avogadro's number is:",
+      "answer": "6.022 × 10²³",
+      "options": ["6.022 × 10²³", "6.022 × 10²²", "6.022 × 10²⁴", "1.66 × 10⁻²⁴"],
+      "remarks": ["Correct! Nₐ = 6.022 × 10²³ mol⁻¹"]
+    },
+    {
+      "question": "How many molecules are in 1 mole of H₂O?",
+      "answer": "6.022 × 10²³",
+      "options": ["6.022 × 10²³", "3.011 × 10²³", "12.044 × 10²³", "18.066 × 10²³"],
+      "remarks": ["Correct! 1 mole = 6.022 × 10²³ molecules"]
+    },
+    {
+      "question": "Molar mass is:",
+      "answer": "Mass of one mole of substance",
+      "options": ["Mass of one mole of substance", "Mass of one atom", "Mass of one molecule", "Mass of 6.022 × 10²² particles"],
+      "remarks": ["Correct! Molar mass = mass of 1 mole (g/mol)"]
+    },
+    {
+      "question": "Molar mass of water is: (H=1, O=16)",
+      "answer": "18 g/mol",
+      "options": ["18 g/mol", "16 g/mol", "20 g/mol", "34 g/mol"],
+      "remarks": ["Correct! 2(1) + 16 = 18 g/mol"]
+    },
+    {
+      "question": "Number of moles equals:",
+      "answer": "Given mass / Molar mass",
+      "options": ["Given mass / Molar mass", "Given mass × Molar mass", "Molar mass / Given mass", "Avogadro number × mass"],
+      "remarks": ["Correct! n = mass(g) / molar mass(g/mol)"]
+    },
+    {
+      "question": "How many moles in 44g CO₂? (C=12, O=16)",
+      "answer": "1 mole",
+      "options": ["1 mole", "0.5 mole", "2 moles", "4 moles"],
+      "remarks": ["Correct! n = 44/44 = 1 mole"]
+    },
+    {
+      "question": "How many atoms in 0.5 mole carbon?",
+      "answer": "3.011 × 10²³",
+      "options": ["3.011 × 10²³", "6.022 × 10²³", "1.505 × 10²³", "12.044 × 10²³"],
+      "remarks": ["Correct! 0.5 × 6.022 × 10²³ = 3.011 × 10²³"]
+    },
+    {
+      "question": "At STP, one mole of gas occupies:",
+      "answer": "22.4 L",
+      "options": ["22.4 L", "11.2 L", "44.8 L", "2.24 L"],
+      "remarks": ["Correct! At STP, 1 mole = 22.4 L"]
+    },
+    {
+      "question": "STP conditions are:",
+      "answer": "273 K and 1 atm",
+      "options": ["273 K and 1 atm", "0°C and 1 bar", "298 K and 1 atm", "373 K and 1 atm"],
+      "remarks": ["Correct! STP = 273 K (0°C) and 1 atm"]
+    },
+    {
+      "question": "Percentage of element in compound equals:",
+      "answer": "(Mass of element / Molar mass of compound) × 100",
+      "options": ["(Mass of element / Molar mass of compound) × 100", "(Mass of element / Total mass) × 10", "(Molar mass / Mass of element) × 100", "Mass of element × 100"],
+      "remarks": ["Correct! % = (mass element / molar mass) × 100"]
+    },
+    {
+      "question": "Percentage of hydrogen in H₂O is: (H=1, O=16)",
+      "answer": "11.11%",
+      "options": ["11.11%", "22.22%", "5.55%", "88.89%"],
+      "remarks": ["Correct! (2/18) × 100 = 11.11%"]
+    },
+    {
+      "question": "Sum of percentage composition of all elements is:",
+      "answer": "100%",
+      "options": ["100%", "50%", "75%", "Varies"],
+      "remarks": ["Correct! All percentages add to 100%."]
+    },
+    {
+      "question": "Empirical formula represents:",
+      "answer": "Simplest whole number ratio of atoms",
+      "options": ["Simplest whole number ratio of atoms", "Actual number of atoms", "Molecular structure", "Molecular mass"],
+      "remarks": ["Correct! Empirical shows simplest ratio."]
+    },
+    {
+      "question": "Empirical formula of glucose C₆H₁₂O₆ is:",
+      "answer": "CH₂O",
+      "options": ["CH₂O", "C₆H₁₂O₆", "C₃H₆O₃", "C₂H₄O₂"],
+      "remarks": ["Correct! Ratio 6:12:6 = 1:2:1 → CH₂O"]
+    },
+    {
+      "question": "Molecular formula can be found from empirical formula if we know:",
+      "answer": "Molecular mass",
+      "options": ["Molecular mass", "Atomic mass", "Percentage composition", "Number of atoms"],
+      "remarks": ["Correct! Molecular = (Empirical)ₙ where n = M/E"]
+    },
+    {
+      "question": "If empirical formula is CH and molecular mass is 78, molecular formula is: (C=12, H=1)",
+      "answer": "C₆H₆",
+      "options": ["C₆H₆", "CH", "C₂H₂", "C₃H₃"],
+      "remarks": ["Correct! n = 78/13 = 6, so C₆H₆"]
+    },
+    {
+      "question": "Stoichiometry deals with:",
+      "answer": "Quantitative relationships in reactions",
+      "options": ["Quantitative relationships in reactions", "Types of reactions", "Naming compounds", "Electronic configuration"],
+      "remarks": ["Correct! Stoichiometry involves mass/mole/volume calculations."]
+    },
+    {
+      "question": "In 2H₂ + O₂ → 2H₂O, moles of H₂ needed for 4 moles H₂O:",
+      "answer": "4 moles",
+      "options": ["4 moles", "2 moles", "8 moles", "1 mole"],
+      "remarks": ["Correct! Ratio H₂:H₂O = 1:1, need 4 moles H₂"]
+    },
+    {
+      "question": "Limiting reagent is:",
+      "answer": "Reactant completely consumed first",
+      "options": ["Reactant completely consumed first", "Reactant in excess", "Reactant with lowest mass", "Product formed"],
+      "remarks": ["Correct! Limiting reagent determines product amount."]
+    },
+    {
+      "question": "When 2 mol H₂ react with 2 mol O₂ in 2H₂ + O₂ → 2H₂O, limiting reagent is:",
+      "answer": "H₂",
+      "options": ["H₂", "O₂", "Both equal", "H₂O"],
+      "remarks": ["Correct! 2 mol H₂ needs only 1 mol O₂, so H₂ limits."]
+    },
+    {
+      "question": "Molarity is defined as:",
+      "answer": "Moles of solute per litre of solution",
+      "options": ["Moles of solute per litre of solution", "Moles per kg solvent", "Mass per litre", "Moles per litre solvent"],
+      "remarks": ["Correct! Molarity (M) = mol/L solution"]
+    },
+    {
+      "question": "Unit of molarity is:",
+      "answer": "mol/L or M",
+      "options": ["mol/L or M", "mol/kg", "g/L", "% w/v"],
+      "remarks": ["Correct! Molarity = mol L⁻¹ or M"]
+    },
+    {
+      "question": "Molarity of 0.5 mol NaCl in 250 mL solution:",
+      "answer": "2 M",
+      "options": ["2 M", "0.5 M", "4 M", "0.25 M"],
+      "remarks": ["Correct! M = 0.5/0.25 = 2 M"]
+    },
+    {
+      "question": "Molality is defined as:",
+      "answer": "Moles of solute per kg of solvent",
+      "options": ["Moles of solute per kg of solvent", "Moles per litre solution", "Mass per volume", "Moles per mole"],
+      "remarks": ["Correct! Molality (m) = mol/kg solvent"]
+    },
+    {
+      "question": "Unit of molality is:",
+      "answer": "mol/kg or m",
+      "options": ["mol/kg or m", "mol/L", "g/kg", "M"],
+      "remarks": ["Correct! Molality = mol kg⁻¹ or m"]
+    },
+    {
+      "question": "Which concentration term is temperature independent?",
+      "answer": "Molality",
+      "options": ["Molality", "Molarity", "Normality", "% w/v"],
+      "remarks": ["Correct! Molality based on mass (not volume)."]
+    },
+    {
+      "question": "How many significant figures in 0.00450?",
+      "answer": "3",
+      "options": ["3", "2", "4", "5"],
+      "remarks": ["Correct! 4, 5, 0 are significant = 3"]
+    },
+    {
+      "question": "How many significant figures in 5.00?",
+      "answer": "3",
+      "options": ["3", "1", "2", "4"],
+      "remarks": ["Correct! 5, 0, 0 all significant = 3"]
+    },
+    {
+      "question": "In multiplication, result has significant figures equal to:",
+      "answer": "Number with least significant figures",
+      "options": ["Number with least significant figures", "Most significant figures", "Average of all", "Sum of all"],
+      "remarks": ["Correct! Limited by fewest sig figs."]
+    },
+    {
+      "question": "Round 2.635 to 3 significant figures:",
+      "answer": "2.64",
+      "options": ["2.64", "2.63", "2.65", "2.6"],
+      "remarks": ["Correct! Round to even: 2.64"]
+    },
+    {
+      "question": "Dimensional analysis is used for:",
+      "answer": "Converting units and checking equations",
+      "options": ["Converting units and checking equations", "Finding formulas", "Balancing equations", "Finding structure"],
+      "remarks": ["Correct! Verifies units and converts."]
+    },
+    {
+      "question": "Density has dimensions of:",
+      "answer": "Mass/Volume",
+      "options": ["Mass/Volume", "Mass × Volume", "Volume/Mass", "Mass + Volume"],
+      "remarks": ["Correct! Density = M/V"]
+    },
+    {
+      "question": "Accuracy refers to:",
+      "answer": "Closeness to true value",
+      "options": ["Closeness to true value", "Closeness of measurements to each other", "Number of sig figs", "Decimal places"],
+      "remarks": ["Correct! Accuracy = closeness to actual value."]
+    },
+    {
+      "question": "Precision refers to:",
+      "answer": "Closeness of repeated measurements",
+      "options": ["Closeness of repeated measurements", "Closeness to true value", "Decimal places", "Instrument type"],
+      "remarks": ["Correct! Precision = reproducibility."]
+    },
+    {
+      "question": "0.000456 in scientific notation is:",
+      "answer": "4.56 × 10⁻⁴",
+      "options": ["4.56 × 10⁻⁴", "4.56 × 10⁴", "45.6 × 10⁻⁵", "0.456 × 10⁻³"],
+      "remarks": ["Correct! Move 4 places right → 4.56 × 10⁻⁴"]
+    },
+    {
+      "question": "6.022 × 10²³ has how many significant figures?",
+      "answer": "4",
+      "options": ["4", "3", "23", "27"],
+      "remarks": ["Correct! 6, 0, 2, 2 = 4 sig figs"]
+    },
+    {
+      "question": "Matter can be classified into:",
+      "answer": "Elements, compounds, and mixtures",
+      "options": ["Elements, compounds, and mixtures", "Solids, liquids, gases", "Pure and impure", "Metals and non-metals"],
+      "remarks": ["Correct! Based on composition."]
+    },
+    {
+      "question": "A pure substance made of only one type of atom is:",
+      "answer": "Element",
+      "options": ["Element", "Compound", "Mixture", "Solution"],
+      "remarks": ["Correct! Element has one type of atom."]
+    },
+    {
+      "question": "Water is an example of:",
+      "answer": "Compound",
+      "options": ["Compound", "Element", "Mixture", "Solution"],
+      "remarks": ["Correct! Water is compound of H and O."]
+    },
+    {
+      "question": "Air is an example of:",
+      "answer": "Homogeneous mixture",
+      "options": ["Homogeneous mixture", "Element", "Compound", "Heterogeneous mixture"],
+      "remarks": ["Correct! Uniform mixture of gases."]
+    },
+    {
+      "question": "Which is a chemical property?",
+      "answer": "Flammability",
+      "options": ["Flammability", "Melting point", "Density", "Boiling point"],
+      "remarks": ["Correct! Flammability is chemical property."]
+    },
+    {
+      "question": "Particles in solid are:",
+      "answer": "Closely packed and vibrate in place",
+      "options": ["Closely packed and vibrate in place", "Free to move", "Loosely packed", "Very far apart"],
+      "remarks": ["Correct! Solid particles tightly packed, vibrate."]
+    },
+    {
+      "question": "Which state has definite volume but no definite shape?",
+      "answer": "Liquid",
+      "options": ["Liquid", "Solid", "Gas", "Plasma"],
+      "remarks": ["Correct! Liquid has volume but takes container shape."]
+    },
+    {
+      "question": "Dalton's atomic theory states atoms of same element are:",
+      "answer": "Identical in mass and properties",
+      "options": ["Identical in mass and properties", "Different in mass", "Different in size", "Variable"],
+      "remarks": ["Correct! Dalton said atoms of same element identical."]
+    },
+    {
+      "question": "Which Dalton postulate is incorrect by modern theory?",
+      "answer": "Atoms are indivisible",
+      "options": ["Atoms are indivisible", "Elements consist of atoms", "Compounds form by combination", "Reactions rearrange atoms"],
+      "remarks": ["Correct! Atoms can be divided into subatomic particles."]
+    },
+    {
+      "question": "Chemical symbol for Sodium is:",
+      "answer": "Na",
+      "options": ["Na", "S", "So", "Sd"],
+      "remarks": ["Correct! Na from Latin Natrium."]
+    },
+    {
+      "question": "Formula for calcium carbonate is:",
+      "answer": "CaCO₃",
+      "options": ["CaCO₃", "CaCO₂", "Ca₂CO₃", "CaC₂O₃"],
+      "remarks": ["Correct! CaCO₃ is calcium carbonate."]
+    },
+    {
+      "question": "A cation is:",
+      "answer": "Positive ion",
+      "options": ["Positive ion", "Negative ion", "Neutral atom", "Molecule"],
+      "remarks": ["Correct! Cation is positively charged ion."]
+    },
+    {
+      "question": "Cl⁻ is an example of:",
+      "answer": "Anion",
+      "options": ["Anion", "Cation", "Neutral atom", "Molecule"],
+      "remarks": ["Correct! Anion is negatively charged ion."]
+    },
+    {
+      "question": "Who discovered electron?",
+      "answer": "J.J. Thomson",
+      "options": ["J.J. Thomson", "Rutherford", "Goldstein", "Chadwick"],
+      "remarks": ["Correct! Thomson discovered electron in 1897."]
+    },
+    {
+      "question": "Neutron was discovered by:",
+      "answer": "James Chadwick",
+      "options": ["James Chadwick", "Rutherford", "Thomson", "Bohr"],
+      "remarks": ["Correct! Chadwick discovered neutron in 1932."]
+    },
+    {
+      "question": "Which subatomic particle has no charge?",
+      "answer": "Neutron",
+      "options": ["Neutron", "Electron", "Proton", "All have charge"],
+      "remarks": ["Correct! Neutron is neutral."]
+    },
+    {
+      "question": "Nucleus contains:",
+      "answer": "Protons and neutrons",
+      "options": ["Protons and neutrons", "Only protons", "Only neutrons", "Electrons and protons"],
+      "remarks": ["Correct! Nucleus has protons and neutrons."]
+    },
+    {
+      "question": "Most mass of atom is in:",
+      "answer": "Nucleus",
+      "options": ["Nucleus", "Electrons", "Shells", "Orbits"],
+      "remarks": ["Correct! Nucleus has protons + neutrons (most mass)."]
+    },
+    {
+      "question": "Atomic number represents:",
+      "answer": "Number of protons",
+      "options": ["Number of protons", "Number of neutrons", "Number of electrons", "Protons + neutrons"],
+      "remarks": ["Correct! Atomic number = protons."]
+    },
+    {
+      "question": "Mass number equals:",
+      "answer": "Protons + Neutrons",
+      "options": ["Protons + Neutrons", "Protons only", "Neutrons only", "Protons + Electrons"],
+      "remarks": ["Correct! Mass number = protons + neutrons."]
+    },
+    {
+      "question": "Isotopes have same:",
+      "answer": "Atomic number",
+      "options": ["Atomic number", "Mass number", "Neutrons", "Physical properties"],
+      "remarks": ["Correct! Isotopes = same protons, different neutrons."]
+    },
+    {
+      "question": "¹²C and ¹⁴C are:",
+      "answer": "Isotopes",
+      "options": ["Isotopes", "Isobars", "Isomers", "Different elements"],
+      "remarks": ["Correct! Same element, different mass = isotopes."]
+    },
+    {
+      "question": "Isobars have same:",
+      "answer": "Mass number",
+      "options": ["Mass number", "Atomic number", "Neutrons", "Element"],
+      "remarks": ["Correct! Isobars = same mass, different protons."]
+    },
+    {
+      "question": "SI unit of amount of substance is:",
+      "answer": "Mole",
+      "options": ["Mole", "Gram", "Kilogram", "Liter"],
+      "remarks": ["Correct! Mole (mol) is SI unit."]
+    },
+    {
+      "question": "SI unit of temperature is:",
+      "answer": "Kelvin",
+      "options": ["Kelvin", "Celsius", "Fahrenheit", "Centigrade"],
+      "remarks": ["Correct! Kelvin (K) is SI unit."]
+    },
+    {
+      "question": "1 kg equals:",
+      "answer": "1000 g",
+      "options": ["1000 g", "10 g", "100 g", "10000 g"],
+      "remarks": ["Correct! 1 kg = 1000 g"]
+    },
+    {
+      "question": "Relationship between molecular and empirical formula is:",
+      "answer": "Molecular = n × Empirical",
+      "options": ["Molecular = n × Empirical", "Always same", "Empirical = n × Molecular", "No relation"],
+      "remarks": ["Correct! Where n = Molecular mass / Empirical mass"]
+    },
+    {
+      "question": "In balanced equation, what is conserved?",
+      "answer": "Number of atoms of each element",
+      "options": ["Number of atoms of each element", "Number of molecules", "Volume", "Temperature"],
+      "remarks": ["Correct! Atoms of each element equal on both sides."]
+    },
+    {
+      "question": "Product amount depends on:",
+      "answer": "Limiting reagent",
+      "options": ["Limiting reagent", "Excess reagent", "Catalyst", "Temperature"],
+      "remarks": ["Correct! Limiting reagent determines product."]
+    },
+    {
+      "question": "Standard for atomic mass is:",
+      "answer": "Carbon-12",
+      "options": ["Carbon-12", "Hydrogen-1", "Oxygen-16", "Nitrogen-14"],
+      "remarks": ["Correct! C-12 is current standard."]
+    }
+  ]
+}
