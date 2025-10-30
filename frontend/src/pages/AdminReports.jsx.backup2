@@ -1,0 +1,979 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Flag, CheckCircle, Trash2, Edit, AlertTriangle, Shield, Eye, RotateCcw, History, Search, Filter, RefreshCw, AlertCircle, BookOpen, FileText, XCircle } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { Textarea } from '../components/ui/textarea';
+import { Input } from '../components/ui/input';
+import { getAllReports, updateReportStatus, deleteReport, markQuestionAsVerified, getQuestionsByChapter, updateQuestion, updateWordMeaningQuestion, getAllSubjects, getChaptersBySubject, getWordMeaningSubjects, getWordMeaningChapters } from '../firebase/services';
+import { toast } from '../hooks/use-toast';
+import QuestionEditHistoryDialog from '../components/QuestionEditHistoryDialog';
+
+const AdminReports = () => {
+  const navigate = useNavigate();
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const [pastReportsCount, setPastReportsCount] = useState(0);
+  const [totalReportsCount, setTotalReportsCount] = useState(0);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [updateJson, setUpdateJson] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending');
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [previewQuestion, setPreviewQuestion] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Store subject and chapter metadata
+  const [subjectsMap, setSubjectsMap] = useState({});
+  const [chaptersMap, setChaptersMap] = useState({});
+
+  // Helper function to clean formatting markers
+  const cleanQuestionText = (text) => {
+    if (!text) return '';
+    let cleaned = text.replace(/!u\s*/gi, '').replace(/\s*!u/gi, '');
+    cleaned = cleaned.replace(/!b/gi, '_____');
+    return cleaned;
+  };
+
+  useEffect(() => {
+    const isAuth = localStorage.getItem('adminAuth');
+    if (!isAuth) {
+      navigate('/admin/login');
+      return;
+    }
+    loadMetadata();
+    loadReports();
+  }, [navigate, activeTab]);
+  
+  // Load all subjects and chapters metadata for breadcrumb
+  const loadMetadata = async () => {
+    try {
+      // Load regular subjects
+      const subjects = await getAllSubjects();
+      const subMap = {};
+      const chapMap = {};
+      
+      for (const subject of subjects) {
+        subMap[subject.id] = subject.name;
+        const chapters = await getChaptersBySubject(subject.id);
+        chapters.forEach(ch => {
+          chapMap[ch.id] = { name: ch.name, subjectName: subject.name };
+        });
+      }
+      
+      // Load word meaning subjects
+      const wmSubjects = await getWordMeaningSubjects();
+      for (const subject of wmSubjects) {
+        subMap[subject.id] = subject.name;
+        const chapters = await getWordMeaningChapters(subject.id);
+        chapters.forEach(ch => {
+          chapMap[ch.id] = { name: ch.name, subjectName: subject.name };
+        });
+      }
+      
+      setSubjectsMap(subMap);
+      setChaptersMap(chapMap);
+    } catch (err) {
+      console.error('Error loading metadata:', err);
+    }
+  };
+
+  const loadReports = async (showRefreshIndicator = false) => {
+    try {
+      if (showRefreshIndicator) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+      
+      const allReports = await getAllReports();
+      
+      if (!Array.isArray(allReports)) {
+        throw new Error('Invalid reports data received');
+      }
+      
+      // Separate pending and past reports
+      const pendingReports = allReports.filter(r => r.status === 'pending');
+      const pastReports = allReports.filter(r => r.status !== 'pending');
+      
+      // Group reports by question
+      const groupReports = (reportsList) => {
+        const grouped = [];
+        const groups = {};
+        
+        reportsList.forEach(report => {
+          const cleanedQuestion = cleanQuestionText(report.questionText || '');
+          const key = `${report.questionId}_${cleanedQuestion}`;
+          
+          if (!groups[key]) {
+            groups[key] = {
+              ...report,
+              reportCount: 1,
+              allReportIds: [report.id]
+            };
+            grouped.push(groups[key]);
+          } else {
+            groups[key].reportCount++;
+            groups[key].allReportIds.push(report.id);
+            if (report.createdAt > groups[key].createdAt) {
+              groups[key] = {
+                ...report,
+                reportCount: groups[key].reportCount,
+                allReportIds: groups[key].allReportIds
+              };
+            }
+          }
+        });
+        
+        return grouped;
+      };
+      
+      const groupedPending = groupReports(pendingReports);
+      const groupedPast = groupReports(pastReports);
+      
+      const combinedReports = activeTab === 'pending' ? groupedPending : groupedPast;
+      
+      setReports(combinedReports);
+      setPendingReportsCount(groupedPending.length);
+      setPastReportsCount(groupedPast.length);
+      setTotalReportsCount(allReports.length);
+    } catch (err) {
+      console.error('Error loading reports:', err);
+      setError('Failed to load reports. Please try again.');
+      toast({
+        title: '❌ Error',
+        description: 'Failed to load reports: ' + err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleMarkAsVerified = async (report) => {
+    try {
+      const result = await markQuestionAsVerified(report.questionId);
+      if (result.success) {
+        // Update all reports in the group
+        await Promise.all(report.allReportIds.map(id => updateReportStatus(id, 'verified')));
+        toast({
+          title: '✅ Success',
+          description: 'Question marked as verified with shield icon.',
+          className: 'bg-emerald-50 border-emerald-200',
+        });
+        loadReports(true);
+      } else {
+        throw new Error(result.error || 'Failed to mark as verified');
+      }
+    } catch (err) {
+      console.error('Error marking as verified:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to mark as verified: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleResolveReport = async (report) => {
+    try {
+      // Resolve all reports in the group
+      await Promise.all(report.allReportIds.map(id => updateReportStatus(id, 'resolved')));
+      toast({
+        title: '✅ Success',
+        description: 'Report marked as resolved.',
+        className: 'bg-emerald-50 border-emerald-200',
+      });
+      loadReports(true);
+    } catch (err) {
+      console.error('Error resolving report:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to resolve report: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleRestoreToPending = async (report) => {
+    try {
+      await Promise.all(report.allReportIds.map(id => updateReportStatus(id, 'pending')));
+      toast({
+        title: '✅ Success',
+        description: 'Report restored to pending.',
+        className: 'bg-emerald-50 border-emerald-200',
+      });
+      loadReports(true);
+    } catch (err) {
+      console.error('Error restoring report:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to restore report: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleViewQuestion = async (report) => {
+    try {
+      let questions = [];
+      const isWordMeaningReport = report.pageId || report.isWordMeaning || report.subjectName === 'Word Meaning';
+      
+      if (isWordMeaningReport) {
+        const pageId = report.pageId || report.chapterId;
+        const { getWordMeaningQuestionsByPage } = await import('../firebase/services');
+        questions = await getWordMeaningQuestionsByPage(pageId);
+      } else {
+        questions = await getQuestionsByChapter(report.chapterId);
+      }
+      
+      const question = questions.find(q => q.id === report.questionId);
+      if (question) {
+        setPreviewQuestion(question);
+        setShowPreviewDialog(true);
+      } else {
+        throw new Error('Question not found');
+      }
+    } catch (err) {
+      console.error('Error loading question:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to load question: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteReport = async (report) => {
+    if (!window.confirm(`Delete ${report.reportCount > 1 ? `all ${report.reportCount} reports` : 'this report'} for this question?`)) return;
+    
+    try {
+      // Delete all reports in the group
+      await Promise.all(report.allReportIds.map(id => deleteReport(id)));
+      toast({
+        title: '✅ Success',
+        description: 'Report(s) deleted successfully.',
+        className: 'bg-emerald-50 border-emerald-200',
+      });
+      loadReports(true);
+    } catch (err) {
+      console.error('Error deleting report:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to delete report: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleUpdateQuestion = async (report) => {
+    try {
+      let questions = [];
+      const isWordMeaningReport = report.pageId || report.isWordMeaning || report.subjectName === 'Word Meaning';
+      
+      if (isWordMeaningReport) {
+        const pageId = report.pageId || report.chapterId;
+        const { getWordMeaningQuestionsByPage } = await import('../firebase/services');
+        questions = await getWordMeaningQuestionsByPage(pageId);
+      } else {
+        questions = await getQuestionsByChapter(report.chapterId);
+      }
+      
+      const question = questions.find(q => q.id === report.questionId);
+      
+      if (question) {
+        setSelectedReport(report);
+        const questionData = { 
+          question: question.question, 
+          answer: question.answer, 
+          options: question.options 
+        };
+        if (question.verified) questionData.verified = true;
+        if (question.remarks) questionData.remarks = question.remarks;
+        
+        setUpdateJson(JSON.stringify({ questions: [questionData] }, null, 2));
+        setShowUpdateDialog(true);
+      } else {
+        throw new Error('Question not found in database');
+      }
+    } catch (err) {
+      console.error('Error loading question for update:', err);
+      toast({
+        title: '❌ Error',
+        description: 'Failed to load question: ' + err.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveUpdate = async () => {
+    if (!selectedReport || !updateJson.trim()) return;
+    
+    setIsUpdating(true);
+    try {
+      const json = JSON.parse(updateJson);
+      const questions = json.questions || [];
+      
+      if (!Array.isArray(questions) || questions.length === 0) {
+        throw new Error('Invalid JSON format - questions array is required');
+      }
+      
+      const questionData = questions[0];
+      let result;
+      
+      const isWordMeaningReport = selectedReport.pageId || selectedReport.isWordMeaning || selectedReport.subjectName === 'Word Meaning';
+      
+      if (isWordMeaningReport) {
+        const pageId = selectedReport.pageId || selectedReport.chapterId;
+        result = await updateWordMeaningQuestion(pageId, selectedReport.questionId, questionData);
+      } else {
+        result = await updateQuestion(selectedReport.chapterId, selectedReport.questionId, questionData);
+      }
+      
+      if (result.success) {
+        toast({ 
+          title: '✅ Success', 
+          description: 'Question updated successfully',
+          className: 'bg-emerald-50 border-emerald-200',
+        });
+        setShowUpdateDialog(false);
+        setUpdateJson('');
+        setSelectedReport(null);
+        loadReports(true);
+      } else {
+        throw new Error(result.error || 'Failed to update question');
+      }
+    } catch (err) {
+      console.error('Update error:', err);
+      toast({ 
+        title: '❌ Error', 
+        description: err.message || 'Failed to update question', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Filter reports based on search and filter type
+  const filteredReports = reports.filter(report => {
+    const matchesSearch = searchQuery === '' || 
+      cleanQuestionText(report.questionText).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesFilter = filterType === 'all' || report.reportType === filterType;
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading reports...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl border-2 border-red-200 max-w-md w-full">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Error Loading Reports</h2>
+          <p className="text-gray-600 mb-6 text-center">{error}</p>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => loadReports()}
+              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+            <Button
+              onClick={() => navigate('/admin/dashboard')}
+              variant="outline"
+              className="flex-1"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-md border-b-2 border-orange-200 sticky top-0 z-30 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 hover:from-orange-200 hover:to-orange-300 flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+              >
+                <ArrowLeft className="w-5 h-5 text-orange-700" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <Flag className="w-7 h-7 text-orange-600" />
+                  Reports Management
+                </h1>
+                <p className="text-sm text-gray-500">Handle student-reported questions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {pendingReportsCount > 0 && (
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md">
+                  {pendingReportsCount} Pending
+                </div>
+              )}
+              <button
+                onClick={() => loadReports(true)}
+                disabled={isRefreshing}
+                className="p-2.5 bg-white border-2 border-orange-200 rounded-xl hover:bg-orange-50 hover:border-orange-400 transition-all shadow-md disabled:opacity-50"
+                title="Refresh Reports"
+              >
+                <RefreshCw className={`w-5 h-5 text-orange-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Total Reports</p>
+                <p className="text-3xl font-bold text-gray-800">{totalReportsCount}</p>
+              </div>
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                <Flag className="w-7 h-7 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg border-2 border-orange-300 hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-700 mb-1">Unique Pending</p>
+                <p className="text-3xl font-bold text-orange-800">{pendingReportsCount}</p>
+              </div>
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md">
+                <AlertTriangle className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:shadow-xl transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Past Reports</p>
+                <p className="text-3xl font-bold text-gray-800">{pastReportsCount}</p>
+              </div>
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-emerald-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-base transition-all shadow-md hover:shadow-lg ${
+              activeTab === 'pending'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white scale-105'
+                : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
+            }`}
+          >
+            <AlertTriangle className="w-5 h-5" />
+            Pending ({pendingReportsCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('past')}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-base transition-all shadow-md hover:shadow-lg ${
+              activeTab === 'past'
+                ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white scale-105'
+                : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
+            }`}
+          >
+            <CheckCircle className="w-5 h-5" />
+            Past ({pastReportsCount})
+          </button>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="bg-white rounded-2xl p-4 shadow-lg border-2 border-gray-200">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by question or feedback..."
+                className="pl-10 h-11 border-2 border-gray-200 focus:border-orange-400 rounded-xl"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterType('all')}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  filterType === 'all'
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilterType('question')}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  filterType === 'question'
+                    ? 'bg-red-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Question
+              </button>
+              <button
+                onClick={() => setFilterType('options')}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  filterType === 'options'
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Options
+              </button>
+              <button
+                onClick={() => setFilterType('both')}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  filterType === 'both'
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Both
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Reports List */}
+        <div className="space-y-4">
+          {filteredReports.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-white rounded-3xl p-16 shadow-xl border-2 border-gray-100">
+                <AlertTriangle className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                <p className="text-2xl font-bold text-gray-400 mb-2">No Reports Found</p>
+                <p className="text-gray-400">
+                  {searchQuery || filterType !== 'all' 
+                    ? 'Try adjusting your search or filter' 
+                    : 'Student reports will appear here'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            filteredReports.map((report) => (
+              <div
+                key={report.id}
+                className={`bg-white rounded-2xl border-2 p-6 shadow-lg transition-all hover:shadow-2xl ${
+                  report.status === 'pending'
+                    ? 'border-orange-300 bg-gradient-to-r from-orange-50 to-white'
+                    : report.status === 'verified'
+                    ? 'border-emerald-300 bg-gradient-to-r from-emerald-50 to-white'
+                    : 'border-gray-200'
+                }`}
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
+                  <div className="flex-1 min-w-0">
+                    {/* Breadcrumb with full names */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 flex-wrap bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                      <BookOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <span className="font-semibold">{report.subjectName || 'Unknown Subject'}</span>
+                      <span className="text-gray-400">›</span>
+                      {report.isWordMeaning || report.subjectName === 'Word Meaning' ? (
+                        <>
+                          <FileText className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                          <span className="font-medium">
+                            {chaptersMap[report.pageId || report.chapterId]?.name || `Page ${report.pageId?.slice(0, 8)}...`}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                          <span className="font-medium">
+                            {chaptersMap[report.chapterId]?.name || `Chapter ${report.chapterId?.slice(0, 8)}...`}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(report.isWordMeaning || report.subjectName === 'Word Meaning') && (
+                        <span className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-sm border border-blue-300">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          Word Meaning
+                        </span>
+                      )}
+                      {report.reportCount > 1 && (
+                        <span className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                          <Flag className="w-3.5 h-3.5" />
+                          {report.reportCount}× Reports
+                        </span>
+                      )}
+                      <span
+                        className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm ${
+                          report.reportType === 'question'
+                            ? 'bg-gradient-to-r from-red-100 to-red-200 text-red-700 border border-red-300'
+                            : report.reportType === 'options'
+                            ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-700 border border-yellow-300'
+                            : 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700 border border-purple-300'
+                        }`}
+                      >
+                        {report.reportType === 'question' && (
+                          <>
+                            <XCircle className="w-3.5 h-3.5" />
+                            Question Issue
+                          </>
+                        )}
+                        {report.reportType === 'options' && (
+                          <>
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                            Options Issue
+                          </>
+                        )}
+                        {report.reportType === 'both' && (
+                          <>
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Both Issues
+                          </>
+                        )}
+                      </span>
+                      <span
+                        className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm ${
+                          report.status === 'pending'
+                            ? 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 border border-orange-300'
+                            : report.status === 'verified'
+                            ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-700 border border-emerald-300'
+                            : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300'
+                        }`}
+                      >
+                        {report.status === 'pending' && (
+                          <>
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                            Pending
+                          </>
+                        )}
+                        {report.status === 'verified' && (
+                          <>
+                            <Shield className="w-3.5 h-3.5" />
+                            Verified
+                          </>
+                        )}
+                        {report.status === 'resolved' && (
+                          <>
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Resolved
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-gray-400 bg-gray-100 px-3 py-1.5 rounded-lg">
+                    {new Date(report.createdAt).toLocaleDateString('en-IN', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}
+                  </span>
+                </div>
+
+                {/* Question */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 mb-4 border-2 border-gray-200 shadow-sm">
+                  <p className="text-xs text-gray-500 mb-2 font-bold uppercase tracking-wide">Question:</p>
+                  <p className="text-base text-gray-800 font-medium leading-relaxed break-words">
+                    {cleanQuestionText(report.questionText)}
+                  </p>
+                  {report.reportCount > 1 && (
+                    <div className="mt-3 pt-3 border-t border-gray-300">
+                      <p className="text-xs text-orange-600 font-bold flex items-center gap-1">
+                        <Flag className="w-3.5 h-3.5" />
+                        Reported {report.reportCount} times by students
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Feedback */}
+                <div className="mb-5">
+                  <p className="text-xs text-gray-500 mb-2 font-bold uppercase tracking-wide">Student Feedback:</p>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-200 shadow-sm">
+                    <p className="text-sm text-gray-700 leading-relaxed italic break-words">
+                      "{report.description}"
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 flex-wrap pt-4 border-t-2 border-gray-100">
+                  <Button
+                    size="sm"
+                    onClick={() => handleViewQuestion(report)}
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Eye className="w-4 h-4 mr-1.5" />
+                    Preview
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSelectedReport(report);
+                      setShowHistoryDialog(true);
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                  >
+                    <History className="w-4 h-4 mr-1.5" />
+                    Details
+                  </Button>
+                  
+                  {report.status === 'pending' ? (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpdateQuestion(report)}
+                        className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
+                      >
+                        <Edit className="w-4 h-4 mr-1.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleResolveReport(report)}
+                        className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white shadow-md hover:shadow-lg transition-all"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1.5" />
+                        Resolve
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleMarkAsVerified(report)}
+                        className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all"
+                      >
+                        <Shield className="w-4 h-4 mr-1.5" />
+                        Verify
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => handleRestoreToPending(report)}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md hover:shadow-lg transition-all"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-1.5" />
+                      Restore
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => handleDeleteReport(report)}
+                    className="text-red-600 hover:bg-red-50 border-2 border-red-200 hover:border-red-300 ml-auto shadow-sm hover:shadow-md transition-all"
+                    variant="outline"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+      
+      {/* Dialogs */}
+      <QuestionEditHistoryDialog
+        isOpen={showHistoryDialog}
+        onClose={() => {
+          setShowHistoryDialog(false);
+          setSelectedReport(null);
+        }}
+        report={selectedReport}
+        onEdit={handleUpdateQuestion}
+        onRefresh={() => loadReports(true)}
+      />
+      
+      {/* Update Dialog */}
+      <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Edit className="w-6 h-6 text-blue-600" />
+              Update Question
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Edit the question JSON below and save your changes
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+              <label className="text-sm font-bold text-blue-900 mb-2 block">
+                {selectedReport?.isWordMeaning || selectedReport?.subjectName === 'Word Meaning' ? (
+                  <>📖 Word Meaning Page: {selectedReport?.pageId?.slice(0, 12) || selectedReport?.chapterId?.slice(0, 12)}...</>
+                ) : (
+                  <>📚 Chapter ID: {selectedReport?.chapterId?.slice(0, 12)}...</>
+                )}
+              </label>
+              <p className="text-xs text-blue-700">
+                Edit the JSON carefully. Keep the format consistent.
+              </p>
+            </div>
+            
+            <Textarea
+              value={updateJson}
+              onChange={(e) => setUpdateJson(e.target.value)}
+              placeholder='Paste or edit your JSON here...'
+              className="w-full min-h-[350px] p-4 border-2 border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowUpdateDialog(false);
+                  setUpdateJson('');
+                  setSelectedReport(null);
+                }} 
+                className="flex-1 h-12 text-base border-2"
+                disabled={isUpdating}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveUpdate} 
+                disabled={isUpdating || !updateJson.trim()} 
+                className="flex-1 h-12 text-base bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Save Update
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Eye className="w-6 h-6 text-purple-600" />
+              Question Preview
+            </DialogTitle>
+            <DialogDescription className="text-base">Current question as it appears to students</DialogDescription>
+          </DialogHeader>
+          {previewQuestion && (
+            <div className="space-y-6 mt-4">
+              {/* Question */}
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-300 shadow-md">
+                <p className="text-xs text-purple-700 font-bold mb-3 uppercase tracking-wide">Question:</p>
+                <p className="text-xl font-semibold text-gray-800 leading-relaxed">
+                  {previewQuestion.question}
+                </p>
+              </div>
+              
+              {/* Options */}
+              <div className="space-y-3">
+                <p className="text-base font-bold text-gray-700 mb-3">Options:</p>
+                {previewQuestion.options && previewQuestion.options.map((option, index) => {
+                  const isCorrect = previewQuestion.answer === option;
+                  return (
+                    <div
+                      key={index}
+                      className={`p-5 rounded-xl border-2 transition-all shadow-sm ${
+                        isCorrect
+                          ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-400'
+                          : 'bg-gray-50 border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-base shadow-md ${
+                          isCorrect ? 'bg-emerald-500 text-white' : 'bg-white border-2 border-gray-400 text-gray-700'
+                        }`}>
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <span className="text-gray-800 font-medium flex-1">{option}</span>
+                        {isCorrect && (
+                          <span className="ml-auto flex-shrink-0 bg-emerald-500 text-white text-sm px-4 py-1.5 rounded-full font-bold shadow-md">
+                            ✓ Correct
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Metadata */}
+              <div className="bg-gray-50 rounded-xl p-5 border-2 border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500 font-medium mb-1">Question ID:</p>
+                    <p className="font-mono text-xs text-gray-800 bg-white px-3 py-2 rounded-lg border border-gray-200">{previewQuestion.id}</p>
+                  </div>
+                  {previewQuestion.verified && (
+                    <div>
+                      <p className="text-gray-500 font-medium mb-1">Status:</p>
+                      <p className="text-emerald-600 font-bold flex items-center gap-2 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
+                        <Shield className="w-5 h-5" /> Verified Question
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => setShowPreviewDialog(false)}
+                className="w-full h-12 text-base bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg hover:shadow-xl"
+              >
+                Close Preview
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default AdminReports;
